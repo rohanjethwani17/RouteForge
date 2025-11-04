@@ -31,6 +31,8 @@ public class AdminService {
     
     private final JedisPool jedisPool;
     private final SseEmitterManager sseEmitterManager;
+    private final AdminClient kafkaAdminClient;
+    private final KafkaAdminConfig kafkaAdminConfig;
     
     /**
      * Clear all vehicle and route cache keys from Redis
