@@ -108,14 +108,22 @@ open http://localhost:3000  # admin/admin123
 
 ## 📖 API Documentation
 
-Interactive docs: http://localhost:8081/swagger-ui.html
-
-Interactive docs: http://localhost:8082/swagger-ui.html
+Interactive docs: **http://localhost:8082/swagger-ui.html**
 
 **Core Endpoints:**
-- `GET /api/routes/{routeId}/vehicles` - Get vehicles on route
+- `GET /api/vehicles/routes/{routeId}` - Get vehicles on route
 - `GET /api/vehicles/{vehicleId}` - Get vehicle position
-- `GET /api/health` - Health check
+- `GET /api/stream/routes/{routeId}` - SSE stream for real-time updates
+- `GET /actuator/health` - Health check
+
+**Admin Endpoints (JWT Required):**
+- `DELETE /api/admin/cache/all` - Clear all cache
+- `DELETE /api/admin/cache/routes/{routeId}` - Clear route cache
+- `GET /api/admin/dlq/metrics` - Get DLQ statistics
+- `POST /api/admin/ingestion/replay` - Replay failed messages
+- `GET /api/admin/stats` - System statistics
+
+See [API.md](docs/API.md) for complete documentation.
 
 ## 🧪 Testing
 
