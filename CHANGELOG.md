@@ -7,6 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Phase 3: ETA Calculation
+
+#### ETA Prediction Endpoint
+- **New Endpoint**: `GET /api/routes/{routeId}/eta?stopId={stopId}`
+  - Calculates estimated arrival time for all vehicles on route to stop
+  - Uses historical speed data from PostgreSQL (last hour)
+  - Falls back to vehicle's current speed or default (25 km/h)
+  - Haversine distance calculation for accuracy
+
+#### ETA Service Implementation
+- `EtaCalculationService`: Core ETA calculation logic
+  - Moving average of historical speeds
+  - Confidence scoring based on sample size
+  - Minimum 5 samples for good confidence
+  - Sample window: 60 minutes
+
+- `EtaPrediction` DTO with fields:
+  - Current position, stop position, distance
+  - Predicted arrival time
+  - Delay seconds (from GTFS-RT)
+  - Confidence score (0.0-1.0)
+  - Calculation metadata
+
+#### New Metrics
+- `routeforge.api.eta.calculations` - Total ETA calculations
+- `routeforge.api.eta.calculation.time` - Timer for calculation duration
+
+#### Algorithm Details
+1. Fetch current vehicle positions from Redis
+2. Query historical average speed: `AVG(speed_kph)` from last hour
+3. Calculate distance using Haversine formula
+4. Compute travel time: `distance / speed * 3600`
+5. Generate confidence score based on sample count
+6. Return predictions with metadata
+
+### Added - Phase 2: Admin & Ops Endpoints (JWT Protected)
+
+#### Admin Controller
+- **New Endpoints** (all require `SCOPE_admin` or `ROLE_ADMIN`):
+  - `DELETE /api/admin/cache/all` - Clear all Redis cache
+  - `DELETE /api/admin/cache/routes/{routeId}` - Clear route-specific cache
+  - `GET /api/admin/dlq/metrics` - Dead-letter queue statistics
+  - `POST /api/admin/ingestion/replay?minutes=N` - Trigger feed replay
+  - `GET /api/admin/stats` - System statistics
+
+#### Admin Service Implementation
+- `AdminService`: Cache management operations
+  - Redis SCAN-based key deletion (production-safe)
+  - Pattern matching: `veh:*`, `route:*:vehicles`
+  - Batch deletion to avoid blocking
+  - Comprehensive statistics aggregation
+
+#### Security Configuration
+- `@PreAuthorize` annotations on all admin endpoints
+- JWT validation with scope/role checking
+- OAuth2 Resource Server enforces authentication in prod
+- Dev profile: all endpoints accessible for testing
+
+#### Cache Management
+- Safe Redis key deletion using SCAN cursor
+- Counts keys by pattern before deletion
+- Tracks deletion metrics for monitoring
+- No KEYS command usage (production-safe)
+
 ### Added - Phase 1: Real-Time Streaming with SSE
 
 #### Server-Sent Events (SSE) Implementation
