@@ -295,9 +295,10 @@ jvm_memory_used_bytes{}
 - Optimal: 1 instance per Kafka partition
 
 **API Gateway:**
-- Stateless, can scale to N instances
-- Load balancer in front (ALB on AWS)
-- WebSocket sessions sticky to instance
+- Mostly stateless (REST endpoints)
+- SSE connections require sticky sessions for multi-instance
+- Load balancer with session affinity (ALB on AWS)
+- Redis Pub/Sub subscriber in each instance (fan-out local emitters)
 
 ### Vertical Scaling
 
