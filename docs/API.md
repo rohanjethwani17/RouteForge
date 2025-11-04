@@ -184,8 +184,8 @@ All errors follow this structure:
 
 Interactive API documentation:
 
-- **Swagger UI:** http://localhost:8081/swagger-ui.html
-- **OpenAPI JSON:** http://localhost:8081/v3/api-docs
+- **Swagger UI:** http://localhost:8082/swagger-ui.html
+- **OpenAPI JSON:** http://localhost:8082/v3/api-docs
 
 ---
 
