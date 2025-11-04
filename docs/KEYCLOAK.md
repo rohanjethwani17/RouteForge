@@ -6,6 +6,8 @@ This guide explains how to configure Keycloak for RouteForge authentication.
 
 Keycloak is included in `docker-compose.yml` and runs on http://localhost:8080.
 
+**✨ Automated Setup:** The `routeforge` realm is automatically imported from `infra/keycloak/routeforge-realm.json` on first startup. You can skip manual configuration!
+
 ### 1. Access Keycloak Admin Console
 
 ```bash
@@ -16,37 +18,99 @@ Login with:
 - Username: `admin`
 - Password: `admin123`
 
-### 2. Create Realm
+### 2. Pre-configured Users
+
+The realm comes with these test users:
+
+**Admin User:**
+- Username: `admin-user`
+- Password: `admin123`
+- Role: `admin` (can access all endpoints including `/api/admin/**`)
+
+**Regular User:**
+- Username: `test-user`
+- Password: `test123`
+- Role: `viewer` (read-only access)
+
+### 3. Obtaining JWT Tokens
+
+#### Option A: Using the Helper Script (Recommended)
+
+```bash
+# Get admin token
+./scripts/get-token.sh admin-user admin123
+
+# Get viewer token
+./scripts/get-token.sh test-user test123
+```
+
+The script outputs the JWT token which you can use in API requests:
+```bash
+TOKEN=$(./scripts/get-token.sh admin-user admin123)
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8082/api/admin/stats
+```
+
+#### Option B: Manual Token Request
+
+```bash
+curl -X POST http://localhost:8080/realms/routeforge/protocol/openid-connect/token \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "client_id=routeforge-api" \
+  -d "client_secret=routeforge-secret" \
+  -d "username=admin-user" \
+  -d "password=admin123" \
+  -d "grant_type=password" | jq -r '.access_token'
+```
+
+### 4. Testing Protected Endpoints
+
+```bash
+# Get token
+TOKEN=$(./scripts/get-token.sh admin-user admin123)
+
+# Test admin endpoint
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8082/api/admin/dlq/metrics
+
+# Clear cache
+curl -X DELETE -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8082/api/admin/cache/routes/1
+
+# Trigger DLQ replay
+curl -X POST -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:8082/api/admin/ingestion/replay?minutes=10"
+```
+
+### 5. Manual Configuration (Optional)
+
+If you need to create additional users or modify the realm:
+
+#### Create Realm (if not using auto-import)
 
 1. Click dropdown in top-left (currently "master")
 2. Click "Create Realm"
 3. Name: `routeforge`
 4. Click "Create"
 
-### 3. Create Client
+#### Create Client
 
 1. Navigate to "Clients" → "Create client"
 2. Configuration:
    - Client ID: `routeforge-api`
    - Client authentication: ON
-   - Authentication flow: Standard flow
+   - Authentication flow: Standard flow, Direct access grants
 3. Click "Save"
-4. In "Credentials" tab, copy "Client Secret"
-5. Add to `.env`:
-   ```
-   KEYCLOAK_CLIENT_SECRET=<paste-secret-here>
-   ```
+4. In "Credentials" tab, set Client Secret to: `routeforge-secret`
 
-### 4. Create Roles
+#### Create Roles
 
 1. Navigate to "Realm roles" → "Create role"
 2. Create roles:
    - `viewer` - Can read all endpoints
    - `admin` - Can access admin endpoints
 
-### 5. Create Users
-
-#### Viewer User
+#### Create Users
 
 1. Navigate to "Users" → "Create user"
 2. Username: `viewer`
