@@ -1,9 +1,12 @@
 package com.routeforge.api.controller;
 
+import com.routeforge.api.dto.EtaPrediction;
+import com.routeforge.api.service.EtaCalculationService;
 import com.routeforge.api.service.VehicleService;
 import com.routeforge.common.dto.ErrorResponse;
 import com.routeforge.common.dto.VehicleResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
