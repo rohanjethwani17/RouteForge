@@ -181,20 +181,42 @@ public class AdminService {
     }
     
     /**
-     * Trigger ingestion replay
-     * Note: This is a placeholder - actual implementation would
-     * communicate with ingestion-service via REST or messaging
+     * Trigger ingestion replay by calling processing service to reprocess DLQ messages
+     * @param minutes Not directly used - instead we replay a limited number of DLQ messages
+     * @return true if replay was triggered successfully
      */
     public boolean triggerIngestionReplay(int minutes) {
-        // Placeholder - in production:
-        // 1. Call ingestion-service REST endpoint
-        // 2. Or publish to a control topic
-        // 3. Ingestion service reads from replay buffer/file
+        log.info("Triggering DLQ replay (approximately {} minutes of history)", minutes);
         
-        log.warn("Ingestion replay not yet implemented - would replay last {} minutes", minutes);
+        // Calculate approximate message count based on minutes
+        // Assuming ~20 messages per minute average (rough estimate)
+        int maxMessages = minutes * 20;
         
-        // Return false to indicate not yet implemented
-        return false;
+        try {
+            // Call processing service internal endpoint
+            String url = "http://localhost:8084/internal/dlq/replay?maxMessages=" + maxMessages;
+            
+            // Make REST call (simple approach without RestClient for now)
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) 
+                new java.net.URL(url).openConnection();
+            conn.setRequestMethod("POST");
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(30000);
+            
+            int responseCode = conn.getResponseCode();
+            
+            if (responseCode >= 200 && responseCode < 300) {
+                log.info("DLQ replay triggered successfully");
+                return true;
+            } else {
+                log.warn("DLQ replay returned non-success status: {}", responseCode);
+                return false;
+            }
+            
+        } catch (Exception e) {
+            log.error("Failed to trigger DLQ replay", e);
+            return false;
+        }
     }
     
     /**
