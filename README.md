@@ -95,9 +95,9 @@ open http://localhost:3000  # admin/admin123
 
 ### Actuator Endpoints
 
+- API Gateway: http://localhost:8082/actuator
 - Ingestion: http://localhost:8083/actuator
 - Processing: http://localhost:8084/actuator
-- API Gateway: http://localhost:8082/actuator
 
 ### Key Metrics
 
