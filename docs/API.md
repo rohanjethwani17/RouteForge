@@ -287,13 +287,224 @@ curl http://localhost:8082/api/stream/stats
 
 ---
 
-## Future Endpoints (Roadmap)
-
-### Get ETA
+### Get ETA Predictions
 
 **GET** `/api/routes/{routeId}/eta?stopId={stopId}`
 
-Estimate arrival time at a stop.
+Calculate estimated time of arrival for all vehicles on a route to a specific stop.
+
+**Parameters:**
+- `routeId` (path, required): Route identifier
+- `stopId` (query, required): Stop identifier for ETA calculation
+
+**Example Request:**
+```bash
+curl "http://localhost:8082/api/routes/1/eta?stopId=STOP_456"
+```
+
+**Response:** `200 OK`
+```json
+[
+  {
+    "vehicleId": "VEHICLE_123",
+    "routeId": "1",
+    "stopId": "STOP_456",
+    "currentLat": 40.7128,
+    "currentLon": -74.0060,
+    "stopLat": 40.7589,
+    "stopLon": -73.9851,
+    "distanceKm": 6.42,
+    "scheduledArrival": null,
+    "predictedArrival": "2024-01-01T12:15:30Z",
+    "delaySeconds": 120,
+    "confidence": 0.85,
+    "calculatedAt": "2024-01-01T12:00:00Z",
+    "note": null
+  },
+  {
+    "vehicleId": "VEHICLE_124",
+    "routeId": "1",
+    "stopId": "STOP_456",
+    "currentLat": 40.7300,
+    "currentLon": -73.9900,
+    "stopLat": 40.7589,
+    "stopLon": -73.9851,
+    "distanceKm": 3.21,
+    "scheduledArrival": null,
+    "predictedArrival": "2024-01-01T12:07:45Z",
+    "delaySeconds": null,
+    "confidence": 0.45,
+    "calculatedAt": "2024-01-01T12:00:00Z",
+    "note": "Low confidence - insufficient historical data"
+  }
+]
+```
+
+**Fields:**
+- `distanceKm` - Haversine distance from current position to stop
+- `predictedArrival` - Estimated arrival time based on historical speed + current speed
+- `confidence` - Prediction confidence (0.0-1.0) based on sample size
+- `note` - Additional information (e.g., low confidence warning)
+
+**Algorithm:**
+1. Get current vehicle positions from Redis
+2. Query historical average speed from PostgreSQL (last hour)
+3. Use vehicle's current speed if available, else historical average
+4. Calculate travel time: `distance / speed`
+5. Confidence based on number of historical samples
+
+**Response:** `404 Not Found` - No vehicles on route or stop not found
+
+---
+
+## Admin Endpoints (JWT Protected)
+
+All admin endpoints require authentication with `SCOPE_admin` or `ROLE_ADMIN`.
+
+### Clear All Cache
+
+**DELETE** `/api/admin/cache/all`
+
+Clears all vehicle and route cache keys from Redis.
+
+**Headers:**
+```
+Authorization: Bearer <jwt-token>
+```
+
+**Example Request:**
+```bash
+TOKEN="<your-jwt-token>"
+curl -X DELETE \
+  -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8082/api/admin/cache/all
+```
+
+**Response:** `200 OK`
+```json
+{
+  "status": "success",
+  "message": "Cache cleared successfully",
+  "keysDeleted": 1523,
+  "timestamp": 1704067200000
+}
+```
+
+---
+
+### Clear Route Cache
+
+**DELETE** `/api/admin/cache/routes/{routeId}`
+
+Clears cache for a specific route.
+
+**Parameters:**
+- `routeId` (path, required): Route identifier
+
+**Example Request:**
+```bash
+curl -X DELETE \
+  -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8082/api/admin/cache/routes/1
+```
+
+**Response:** `200 OK`
+```json
+{
+  "status": "success",
+  "message": "Route cache cleared",
+  "routeId": "1",
+  "keysDeleted": 15,
+  "timestamp": 1704067200000
+}
+```
+
+---
+
+### Get DLQ Metrics
+
+**GET** `/api/admin/dlq/metrics`
+
+Returns statistics about dead-letter queue messages.
+
+**Example Request:**
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8082/api/admin/dlq/metrics
+```
+
+**Response:** `200 OK`
+```json
+{
+  "dlqTopic": "vehicle_positions.dlq",
+  "estimatedMessages": 42,
+  "timestamp": 1704067200000
+}
+```
+
+---
+
+### Trigger Ingestion Replay
+
+**POST** `/api/admin/ingestion/replay?minutes=10`
+
+Triggers ingestion service to replay recent feed data.
+
+**Parameters:**
+- `minutes` (query, optional): Minutes of history to replay (default: 10)
+
+**Example Request:**
+```bash
+curl -X POST \
+  -H "Authorization: Bearer $TOKEN" \
+  "http://localhost:8082/api/admin/ingestion/replay?minutes=15"
+```
+
+**Response:** `202 Accepted`
+```json
+{
+  "status": "accepted",
+  "message": "Replay triggered successfully",
+  "minutesToReplay": 15,
+  "timestamp": 1704067200000
+}
+```
+
+**Response:** `503 Service Unavailable` - Ingestion service unavailable
+
+---
+
+### Get Admin Statistics
+
+**GET** `/api/admin/stats`
+
+Returns overall system statistics for monitoring.
+
+**Example Request:**
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8082/api/admin/stats
+```
+
+**Response:** `200 OK`
+```json
+{
+  "redis": {
+    "vehicleKeys": 1250,
+    "routeKeys": 45,
+    "totalKeys": 1295
+  },
+  "sse": {
+    "activeConnections": 23,
+    "activeRoutes": 8
+  },
+  "timestamp": 1704067200000
+}
+```
+
+---
+
+## Future Endpoints (Roadmap)
 
 ### Get Route Details
 
