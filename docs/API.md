@@ -121,7 +121,7 @@ Retrieve current position of a specific vehicle.
 
 **Example Request:**
 ```bash
-curl http://localhost:8081/api/vehicles/VEHICLE_123
+curl http://localhost:8082/api/vehicles/VEHICLE_123
 ```
 
 **Response:** `200 OK`
