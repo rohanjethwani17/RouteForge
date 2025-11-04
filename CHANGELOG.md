@@ -7,6 +7,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Phase 6: Infrastructure as Code & Final Documentation
+
+#### Terraform AWS Deployment
+- **Complete IaC**: Terraform modules for AWS production deployment
+  - VPC module: Public/private subnets, NAT gateway, routing
+  - MSK module: Managed Kafka cluster (placeholder)
+  - ElastiCache module: Redis cluster (placeholder)
+  - RDS module: PostgreSQL database (placeholder)
+  - ECS module: Fargate services (placeholder)
+  - ALB module: Load balancer with path routing (placeholder)
+
+#### Cost Documentation
+- Comprehensive cost estimates in `/infra/terraform/README.md`
+- Monthly cost breakdown by service
+- Development vs production configurations
+- Cost optimization strategies
+
+#### Deployment Guide
+- Step-by-step AWS deployment instructions
+- Variable configuration examples
+- Safe teardown procedures
+- Scaling guidelines
+
+#### Infrastructure Features
+- Multi-AZ high availability
+- Auto-scaling policies (documented)
+- Security best practices
+- Disaster recovery procedures
+
+### Added - Phase 5: Enhanced Observability
+
+#### Prometheus Alert Rules
+- **Alert File**: `/infra/prometheus/alerts.yml`
+  - 15 production-ready alert rules
+  - Service health monitoring
+  - API latency alerts (warning: >200ms, critical: >500ms)
+  - Kafka consumer lag alerts (warning: >1000, critical: >5000)
+  - Error rate monitoring (1% warning, 5% critical)
+  - JVM memory alerts (85% warning, 95% critical)
+
+#### Alert Categories
+1. **Service Health**: Service down detection (2min threshold)
+2. **Performance**: API latency and throughput degradation
+3. **Data Pipeline**: Consumer lag, ingestion stalled, DLQ accumulation
+4. **Infrastructure**: Redis errors, JVM memory pressure
+5. **Real-Time**: SSE message failure rates
+
+#### Updated Prometheus Configuration
+- Mounted alert rules in docker-compose
+- Added `--web.enable-lifecycle` flag for live reload
+- Alert evaluation interval: 15 seconds
+
+#### Enhanced Grafana Dashboard
+- Added Service Health panel (UP/DOWN status)
+- All services monitored with color-coded status
+- Ready for alert annotations
+
+### Added - Phase 4: Comprehensive Testing
+
+#### Unit Tests
+- `EventIdGeneratorTest`: Common utility tests
+- `GtfsRealtimeParserTest`: GTFS-RT protobuf parsing
+  - Tests: empty feed, valid positions, multiple vehicles
+  - Speed conversion validation (m/s to km/h)
+  - Event ID generation verification
+
+#### Integration Tests with Testcontainers
+- `ProcessingIntegrationTest`: End-to-end flow testing
+  - Kafka, PostgreSQL, Redis containers
+  - Tests: single event processing, batch processing
+  - Verifies dual-write (Redis + PostgreSQL)
+  - Async assertions with Awaitility
+
+#### CI/CD Enhancements
+- Updated GitHub Actions workflow
+  - Separate build and test phases
+  - Integration test job with Testcontainers
+  - Smoke test job for main branch
+  - Test result artifact uploads
+
+#### Smoke Tests
+- Infrastructure startup with docker-compose
+- Service health checks
+- API endpoint validation
+- SSE streaming test
+- Prometheus metrics verification
+- Service log capture on failure
+
+#### Test Dependencies
+- Added Awaitility 4.2.0 for async testing
+- Testcontainers for Kafka, PostgreSQL, Redis
+- Spring Kafka Test support
+
 ### Added - Phase 3: ETA Calculation
 
 #### ETA Prediction Endpoint
