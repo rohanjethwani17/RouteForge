@@ -425,7 +425,7 @@ curl -X DELETE \
 
 **GET** `/api/admin/dlq/metrics`
 
-Returns statistics about dead-letter queue messages.
+Returns real-time statistics about dead-letter queue messages using Kafka Admin API.
 
 **Example Request:**
 ```bash
@@ -437,7 +437,48 @@ curl -H "Authorization: Bearer $TOKEN" \
 ```json
 {
   "dlqTopic": "vehicle_positions.dlq",
-  "estimatedMessages": 42,
+  "partitionCount": 3,
+  "totalMessages": 42,
+  "partitions": {
+    "0": {
+      "earliestOffset": 0,
+      "latestOffset": 15,
+      "messageCount": 15
+    },
+    "1": {
+      "earliestOffset": 0,
+      "latestOffset": 20,
+      "messageCount": 20
+    },
+    "2": {
+      "earliestOffset": 0,
+      "latestOffset": 7,
+      "messageCount": 7
+    }
+  },
+  "status": "success",
+  "instructions": {
+    "consume": "kafka-console-consumer --bootstrap-server localhost:9092 --topic vehicle_positions.dlq --from-beginning",
+    "count": "Total messages currently in DLQ: 42"
+  },
+  "timestamp": 1704067200000
+}
+```
+
+**Fields:**
+- `totalMessages` - Total number of messages across all partitions
+- `partitionCount` - Number of topic partitions
+- `partitions` - Per-partition offset details
+- `status` - "success" or "error"
+- `instructions` - CLI commands for DLQ inspection
+
+**Response:** `200 OK` (with error status on Kafka connection failure)
+```json
+{
+  "dlqTopic": "vehicle_positions.dlq",
+  "status": "error",
+  "error": "Connection to Kafka failed",
+  "note": "Failed to connect to Kafka. Ensure Kafka is running and accessible.",
   "timestamp": 1704067200000
 }
 ```
