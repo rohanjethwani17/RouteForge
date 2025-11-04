@@ -151,13 +151,14 @@ public class EtaCalculationService {
      */
     private Double getHistoricalAverageSpeed(String routeId) {
         try {
+            // Fixed: Use INTERVAL multiplication for proper parameterization
             String sql = """
                 SELECT AVG(speed_kph) as avg_speed
                 FROM vehicle_positions_history
                 WHERE route_id = ?
                   AND speed_kph IS NOT NULL
                   AND speed_kph > 0
-                  AND recorded_at > NOW() - INTERVAL '? minutes'
+                  AND recorded_at > NOW() - INTERVAL '1 minute' * ?
                 """;
             
             Double avgSpeed = jdbcTemplate.queryForObject(
@@ -181,12 +182,13 @@ public class EtaCalculationService {
      */
     private int getHistoricalSampleCount(String routeId) {
         try {
+            // Fixed: Use INTERVAL multiplication for proper parameterization
             String sql = """
                 SELECT COUNT(*) 
                 FROM vehicle_positions_history
                 WHERE route_id = ?
                   AND speed_kph IS NOT NULL
-                  AND recorded_at > NOW() - INTERVAL '? minutes'
+                  AND recorded_at > NOW() - INTERVAL '1 minute' * ?
                 """;
             
             Integer count = jdbcTemplate.queryForObject(
