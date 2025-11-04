@@ -73,7 +73,7 @@ Started [ServiceName]Application in X.XXX seconds
 
 ### Check Health
 ```bash
-curl http://localhost:8081/api/health
+curl http://localhost:8082/api/health
 ```
 
 Expected response:
@@ -89,14 +89,14 @@ Expected response:
 
 ```bash
 # Wait ~10 seconds for data ingestion, then:
-curl http://localhost:8081/api/routes/1/vehicles | jq
+curl http://localhost:8082/api/routes/1/vehicles | jq
 ```
 
 You should see an array of vehicle positions!
 
 ### View in Browser
 
-- **API Docs:** http://localhost:8081/swagger-ui.html
+- **API Docs:** http://localhost:8082/swagger-ui.html
 - **Grafana:** http://localhost:3000 (admin/admin123)
 - **Prometheus:** http://localhost:9090
 
