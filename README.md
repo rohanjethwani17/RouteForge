@@ -79,13 +79,13 @@ docker compose ps
 
 ```bash
 # Check API health
-curl http://localhost:8081/api/health
+curl http://localhost:8082/api/health
 
 # Get vehicles for a route
-curl http://localhost:8081/api/routes/1/vehicles
+curl http://localhost:8082/api/routes/1/vehicles
 
 # View Swagger UI
-open http://localhost:8081/swagger-ui.html
+open http://localhost:8082/swagger-ui.html
 
 # View Grafana
 open http://localhost:3000  # admin/admin123
