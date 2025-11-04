@@ -48,6 +48,16 @@ RouteForge is a distributed system for real-time public transit tracking that de
                └────────┘   └──────────┘
 ```
 
+### Data Flow with Real-Time Streaming
+
+```
+GTFS-RT → Ingestion → Kafka → Processing → Redis + DB
+                                              ↓
+                                        Redis Pub/Sub
+                                              ↓
+                                         API Gateway → SSE → Clients
+```
+
 ### Service Responsibilities
 
 #### Ingestion Service
