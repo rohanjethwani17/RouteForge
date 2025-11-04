@@ -13,4 +13,5 @@ public class ProcessingProperties {
     private String dlqTopic = "vehicle_positions.dlq";
     private int batchSize = 50;
     private int batchTimeoutMs = 5000;
+    private String kafkaBootstrapServers = "localhost:9092";
 }
