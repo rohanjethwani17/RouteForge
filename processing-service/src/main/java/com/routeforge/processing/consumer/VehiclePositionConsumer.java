@@ -130,6 +130,17 @@ public class VehiclePositionConsumer {
     }
     
     /**
+     * Publish update notifications via Redis Pub/Sub for SSE streaming
+     */
+    private void publishUpdateNotifications(List<VehiclePositionEvent> events) {
+        Map<String, String> routeVehicleMap = new HashMap<>();
+        for (VehiclePositionEvent event : events) {
+            routeVehicleMap.put(event.getRouteId(), event.getVehicleId());
+        }
+        pubSubService.publishBulkRouteUpdates(routeVehicleMap);
+    }
+    
+    /**
      * Send failed events to dead-letter queue
      */
     private void sendToDLQ(List<VehiclePositionEvent> events) {
