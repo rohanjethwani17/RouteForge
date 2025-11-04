@@ -78,12 +78,13 @@ GTFS-RT → Ingestion → Kafka → Processing → Redis + DB
 
 #### API Gateway Service
 - REST endpoints for vehicle queries
-- WebSocket/SSE for real-time updates
+- Server-Sent Events (SSE) for real-time streaming
+- Redis Pub/Sub subscriber for update notifications
 - Redis-first read pattern (fallback to DB)
 - OAuth2 Resource Server (JWT)
 - Rate limiting (Bucket4j)
 - OpenAPI documentation
-- Metrics: request latency, throughput, cache hit/miss
+- Metrics: request latency, throughput, cache hit/miss, active SSE connections
 
 ## Data Models
 
