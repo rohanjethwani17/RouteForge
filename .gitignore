@@ -51,3 +51,7 @@ docker-compose.override.yml
 *.bak
 *.swp
 node_modules/
+-e 
+# Environment files
+*.env
+*.env.*
