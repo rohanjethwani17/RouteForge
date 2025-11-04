@@ -86,6 +86,9 @@ public class VehiclePositionConsumer {
             // Batch insert to PostgreSQL
             databaseService.saveVehiclePositions(validEvents);
             
+            // Publish update notifications for SSE streaming
+            publishUpdateNotifications(validEvents);
+            
             eventsProcessed.increment(validEvents.size());
             log.info("Successfully processed {} events", validEvents.size());
             
