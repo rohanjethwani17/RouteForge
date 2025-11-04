@@ -74,6 +74,35 @@ public class VehicleController {
             .orElse(ResponseEntity.notFound().build());
     }
     
+    @Operation(
+        summary = "Get ETA predictions for a route",
+        description = "Calculate estimated time of arrival for all vehicles on a route to a specific stop. " +
+                      "Uses historical speed data and current vehicle positions for prediction."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "ETA predictions calculated"),
+        @ApiResponse(responseCode = "404", description = "Route or stop not found"),
+        @ApiResponse(responseCode = "429", description = "Rate limit exceeded")
+    })
+    @GetMapping("/routes/{routeId}/eta")
+    public ResponseEntity<List<EtaPrediction>> getEta(
+            @Parameter(description = "Route ID", required = true)
+            @PathVariable String routeId,
+            @Parameter(description = "Stop ID for ETA calculation", required = true)
+            @RequestParam String stopId) {
+        
+        log.debug("GET /api/routes/{}/eta?stopId={}", routeId, stopId);
+        
+        List<EtaPrediction> predictions = etaCalculationService.calculateEtaForRoute(routeId, stopId);
+        
+        if (predictions.isEmpty()) {
+            log.debug("No ETA predictions available for route: {}, stop: {}", routeId, stopId);
+            return ResponseEntity.notFound().build();
+        }
+        
+        return ResponseEntity.ok(predictions);
+    }
+    
     @Operation(summary = "Health check", description = "API health status")
     @GetMapping("/health")
     public ResponseEntity<Map<String, Object>> health() {
