@@ -110,6 +110,8 @@ open http://localhost:3000  # admin/admin123
 
 Interactive docs: http://localhost:8081/swagger-ui.html
 
+Interactive docs: http://localhost:8082/swagger-ui.html
+
 **Core Endpoints:**
 - `GET /api/routes/{routeId}/vehicles` - Get vehicles on route
 - `GET /api/vehicles/{vehicleId}` - Get vehicle position
