@@ -47,6 +47,9 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+server:
+  port: ${PROCESSING_PORT:8084}
+
 routeforge:
   processing:
     topic: ${KAFKA_TOPIC_VEHICLE_POSITIONS:vehicle_positions}
