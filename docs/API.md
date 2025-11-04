@@ -199,6 +199,94 @@ Operational endpoints (exposed on port 8082):
 
 ---
 
+### Stream Live Vehicle Updates (SSE)
+
+**GET** `/api/stream/routes/{routeId}`
+
+Opens a Server-Sent Events (SSE) connection for real-time vehicle position updates.
+
+**Parameters:**
+- `routeId` (path, required): Route identifier
+
+**Headers:**
+- `Accept: text/event-stream`
+
+**Example Request:**
+```bash
+curl -N -H "Accept: text/event-stream" \
+  http://localhost:8082/api/stream/routes/1
+```
+
+**Response:** Continuous event stream
+
+```
+event: connected
+data: {"message":"Connected to route 1","timestamp":1704067200000}
+
+event: vehicle-update
+data: {"vehicleId":"VEHICLE_123","routeId":"1","lat":40.7128,"lon":-74.0060,"speedKph":25.5,"headingDeg":90.0,"timestamp":"2024-01-01T12:00:00Z"}
+
+event: heartbeat
+: keep-alive
+
+event: vehicle-update
+data: {"vehicleId":"VEHICLE_124","routeId":"1","lat":40.7589,"lon":-73.9851,"speedKph":30.0,"headingDeg":180.0,"timestamp":"2024-01-01T12:00:05Z"}
+```
+
+**Event Types:**
+- `connected` - Initial connection confirmation
+- `vehicle-update` - Real-time vehicle position update (JSON)
+- `heartbeat` - Keep-alive ping (every 15 seconds)
+
+**Connection Details:**
+- Timeout: 30 minutes of inactivity
+- Reconnection: Client should reconnect on disconnect
+- Backpressure: Server drops oldest events if client can't keep up
+
+**JavaScript Client Example:**
+```javascript
+const eventSource = new EventSource('http://localhost:8082/api/stream/routes/1');
+
+eventSource.addEventListener('connected', (event) => {
+  console.log('Connected:', JSON.parse(event.data));
+});
+
+eventSource.addEventListener('vehicle-update', (event) => {
+  const vehicle = JSON.parse(event.data);
+  console.log('Vehicle update:', vehicle);
+  // Update map marker at vehicle.lat, vehicle.lon
+});
+
+eventSource.onerror = (error) => {
+  console.error('SSE error:', error);
+  eventSource.close();
+  // Implement reconnection logic
+};
+```
+
+---
+
+### Get Streaming Statistics
+
+**GET** `/api/stream/stats`
+
+Returns current SSE streaming statistics.
+
+**Example Request:**
+```bash
+curl http://localhost:8082/api/stream/stats
+```
+
+**Response:** `200 OK`
+```json
+{
+  "activeConnections": 15,
+  "activeRoutes": 3
+}
+```
+
+---
+
 ## Future Endpoints (Roadmap)
 
 ### Get ETA
