@@ -1,0 +1,71 @@
+spring:
+  application:
+    name: api-gateway-service
+  
+  datasource:
+    url: ${POSTGRES_JDBC_URL:jdbc:postgresql://localhost:5432/routeforge}
+    username: ${POSTGRES_USER:routeforge}
+    password: ${POSTGRES_PASSWORD:routeforge123}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: false
+  
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${JWT_ISSUER_URI:http://localhost:8080/realms/routeforge}
+
+server:
+  port: ${API_PORT:8081}
+
+routeforge:
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    timeout-ms: 3000
+  
+  api:
+    rate-limit:
+      capacity: ${API_RATE_LIMIT_CAPACITY:100}
+      refill-tokens: ${API_RATE_LIMIT_REFILL_TOKENS:100}
+      refill-duration-sec: ${API_RATE_LIMIT_REFILL_DURATION_SEC:60}
+
+management:
+  server:
+    port: ${MANAGEMENT_PORT:8082}
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+
+logging:
+  level:
+    root: INFO
+    com.routeforge: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg - traceId=%X{traceId}%n"
