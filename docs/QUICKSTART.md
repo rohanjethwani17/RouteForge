@@ -104,9 +104,9 @@ You should see an array of vehicle positions!
 
 | Service | Port | Purpose |
 |---------|------|---------|
-| API Gateway | 8081 | REST API |
-| Ingestion | 8083 | GTFS-RT polling |
-| Processing | 8084 | Event processing |
+| API Gateway | 8082 | REST API + Actuator |
+| Ingestion | 8083 | GTFS-RT polling + Actuator |
+| Processing | 8084 | Event processing + Actuator |
 | Kafka | 9092 | Event streaming |
 | Redis | 6379 | Hot cache |
 | PostgreSQL | 5432 | Historical data |
