@@ -15,6 +15,9 @@ spring:
         max.in.flight.requests.per.connection: 5
         enable.idempotence: true
 
+server:
+  port: ${INGESTION_PORT:8083}
+
 routeforge:
   ingestion:
     feed-url: ${GTFS_RT_FEED_URL:https://api-endpoint.mta.info/Dataservice/mtagtfsfeeds/nyct%2Fgtfs}
