@@ -119,7 +119,7 @@ You should see an array of vehicle positions!
 ### "Port already in use"
 ```bash
 # Find and kill process
-lsof -ti:8081 | xargs kill -9  # Replace 8081 with your port
+lsof -ti:8082 | xargs kill -9  # Replace 8082 with your port
 ```
 
 ### "Cannot connect to Docker daemon"
