@@ -31,6 +31,7 @@ import java.util.List;
 public class VehicleController {
     
     private final VehicleService vehicleService;
+    private final EtaCalculationService etaCalculationService;
     
     @Operation(summary = "Get vehicles by route", description = "Retrieve all active vehicles for a specific route")
     @ApiResponses(value = {
