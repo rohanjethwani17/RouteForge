@@ -26,9 +26,9 @@ docker compose ps  # All services should show "healthy"
 
 ```bash
 # Check all services are up
+curl http://localhost:8082/actuator/health  # API Gateway
 curl http://localhost:8083/actuator/health  # Ingestion
 curl http://localhost:8084/actuator/health  # Processing
-curl http://localhost:8082/actuator/health  # API Gateway
 
 # Check infrastructure
 docker compose ps
