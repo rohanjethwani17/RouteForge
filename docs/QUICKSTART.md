@@ -96,8 +96,39 @@ You should see an array of vehicle positions!
 
 ### View in Browser
 
-- **API Docs:** http://localhost:8082/swagger-ui.html
-- **Grafana:** http://localhost:3000 (admin/admin123)
+- **API Docs (Swagger UI):** http://localhost:8082/swagger-ui.html
+- **Grafana Dashboard:** http://localhost:3000 (admin/admin123)
+- **Prometheus Metrics:** http://localhost:9090
+- **Keycloak Admin:** http://localhost:8080 (admin/admin123)
+
+### Test Real-Time Streaming (SSE)
+
+```bash
+# Stream vehicle updates for route 1
+curl -N -H "Accept: text/event-stream" \
+  http://localhost:8082/api/stream/routes/1
+```
+
+You'll see real-time vehicle position updates as they arrive!
+
+### Test Admin Endpoints (JWT Required)
+
+```bash
+# Get JWT token
+TOKEN=$(./scripts/get-token.sh admin-user admin123)
+
+# View DLQ metrics
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8082/api/admin/dlq/metrics | jq
+
+# Get system statistics
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8082/api/admin/stats | jq
+
+# Clear route cache
+curl -X DELETE -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8082/api/admin/cache/routes/1 | jq
+```
 - **Prometheus:** http://localhost:9090
 
 ## What's Running?
