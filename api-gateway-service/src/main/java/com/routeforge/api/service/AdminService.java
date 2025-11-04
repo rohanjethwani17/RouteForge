@@ -94,44 +94,88 @@ public class AdminService {
     }
     
     /**
-     * Get DLQ metrics from Kafka topic
-     * Uses Kafka Admin API to get actual partition sizes
-     * 
-     * NOTE: Requires Kafka Admin dependency and configuration.
-     * For MVP, we provide stats from application metrics instead.
+     * Get DLQ metrics from Kafka topic using Kafka Admin API
+     * Returns real-time statistics about dead-letter queue messages
      */
     public Map<String, Object> getDlqMetrics() {
         Map<String, Object> metrics = new HashMap<>();
+        String dlqTopic = kafkaAdminConfig.getDlqTopic();
         
-        metrics.put("dlqTopic", "vehicle_positions.dlq");
+        metrics.put("dlqTopic", dlqTopic);
         metrics.put("timestamp", System.currentTimeMillis());
         
-        // In production, use Kafka Admin API:
-        // try (AdminClient adminClient = AdminClient.create(kafkaProperties)) {
-        //     Map<TopicPartition, OffsetSpec> requestLatestOffsets = new HashMap<>();
-        //     TopicPartition tp = new TopicPartition("vehicle_positions.dlq", 0);
-        //     requestLatestOffsets.put(tp, OffsetSpec.latest());
-        //     
-        //     Map<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> offsets = 
-        //         adminClient.listOffsets(requestLatestOffsets).all().get();
-        //     
-        //     long messageCount = offsets.get(tp).offset();
-        //     metrics.put("messageCount", messageCount);
-        // }
-        
-        // For MVP: Return instructions for monitoring
-        metrics.put("note", "Use Kafka Admin API or Kafka Manager to view DLQ messages");
-        metrics.put("instructions", Map.of(
-            "cli", "kafka-console-consumer --bootstrap-server localhost:9092 --topic vehicle_positions.dlq --from-beginning",
-            "count", "kafka-run-class kafka.tools.GetOffsetShell --broker-list localhost:9092 --topic vehicle_positions.dlq"
-        ));
-        
-        // Provide application-level failure metrics instead
-        metrics.put("applicationMetrics", Map.of(
-            "metricName", "routeforge_processing_events_failed_total",
-            "endpoint", "/actuator/prometheus",
-            "description", "Total failed events sent to DLQ"
-        ));
+        try {
+            // Get topic description to find partitions
+            TopicDescription topicDescription = kafkaAdminClient
+                .describeTopics(Collections.singleton(dlqTopic))
+                .all()
+                .get(5, TimeUnit.SECONDS)
+                .get(dlqTopic);
+            
+            int partitionCount = topicDescription.partitions().size();
+            metrics.put("partitionCount", partitionCount);
+            
+            // Get offsets for all partitions
+            Map<TopicPartition, OffsetSpec> latestOffsetRequest = new HashMap<>();
+            Map<TopicPartition, OffsetSpec> earliestOffsetRequest = new HashMap<>();
+            
+            for (int i = 0; i < partitionCount; i++) {
+                TopicPartition tp = new TopicPartition(dlqTopic, i);
+                latestOffsetRequest.put(tp, OffsetSpec.latest());
+                earliestOffsetRequest.put(tp, OffsetSpec.earliest());
+            }
+            
+            // Fetch latest offsets
+            Map<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> latestOffsets = 
+                kafkaAdminClient.listOffsets(latestOffsetRequest)
+                    .all()
+                    .get(5, TimeUnit.SECONDS);
+            
+            // Fetch earliest offsets
+            Map<TopicPartition, ListOffsetsResult.ListOffsetsResultInfo> earliestOffsets = 
+                kafkaAdminClient.listOffsets(earliestOffsetRequest)
+                    .all()
+                    .get(5, TimeUnit.SECONDS);
+            
+            // Calculate total message count
+            long totalMessages = 0;
+            Map<Integer, Map<String, Long>> partitionMetrics = new HashMap<>();
+            
+            for (int i = 0; i < partitionCount; i++) {
+                TopicPartition tp = new TopicPartition(dlqTopic, i);
+                long latest = latestOffsets.get(tp).offset();
+                long earliest = earliestOffsets.get(tp).offset();
+                long count = latest - earliest;
+                totalMessages += count;
+                
+                Map<String, Long> partitionInfo = new HashMap<>();
+                partitionInfo.put("earliestOffset", earliest);
+                partitionInfo.put("latestOffset", latest);
+                partitionInfo.put("messageCount", count);
+                partitionMetrics.put(i, partitionInfo);
+            }
+            
+            metrics.put("totalMessages", totalMessages);
+            metrics.put("partitions", partitionMetrics);
+            metrics.put("status", "success");
+            
+            // Add helpful instructions
+            metrics.put("instructions", Map.of(
+                "consume", "kafka-console-consumer --bootstrap-server " + 
+                    kafkaAdminConfig.getBootstrapServers() + 
+                    " --topic " + dlqTopic + " --from-beginning",
+                "count", "Total messages currently in DLQ: " + totalMessages
+            ));
+            
+            log.info("Retrieved DLQ metrics: {} total messages across {} partitions", 
+                totalMessages, partitionCount);
+            
+        } catch (Exception e) {
+            log.error("Failed to retrieve DLQ metrics from Kafka", e);
+            metrics.put("status", "error");
+            metrics.put("error", e.getMessage());
+            metrics.put("note", "Failed to connect to Kafka. Ensure Kafka is running and accessible.");
+        }
         
         return metrics;
     }
