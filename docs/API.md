@@ -485,14 +485,14 @@ curl -H "Authorization: Bearer $TOKEN" \
 
 ---
 
-### Trigger Ingestion Replay
+### Trigger DLQ Replay
 
 **POST** `/api/admin/ingestion/replay?minutes=10`
 
-Triggers ingestion service to replay recent feed data.
+Triggers processing service to replay failed messages from the DLQ (Dead Letter Queue).
 
 **Parameters:**
-- `minutes` (query, optional): Minutes of history to replay (default: 10)
+- `minutes` (query, optional): Approximate minutes of history to replay (default: 10, ~20 messages/minute)
 
 **Example Request:**
 ```bash
@@ -511,7 +511,21 @@ curl -X POST \
 }
 ```
 
-**Response:** `503 Service Unavailable` - Ingestion service unavailable
+**Response:** `503 Service Unavailable` - Processing service unavailable
+```json
+{
+  "status": "error",
+  "message": "Failed to trigger replay - ingestion service may be unavailable",
+  "timestamp": 1704067200000
+}
+```
+
+**How It Works:**
+1. API Gateway calls processing-service internal endpoint `/internal/dlq/replay`
+2. Processing service creates temporary Kafka consumer for DLQ topic
+3. Messages are consumed, reprocessed, and written to Redis + PostgreSQL
+4. Successfully replayed messages are removed from DLQ
+5. Returns count of messages replayed
 
 ---
 
