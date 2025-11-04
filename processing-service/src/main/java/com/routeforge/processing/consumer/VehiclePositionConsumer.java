@@ -31,6 +31,7 @@ public class VehiclePositionConsumer {
     
     private final RedisService redisService;
     private final DatabaseService databaseService;
+    private final RedisPubSubService pubSubService;
     private final ProcessingProperties properties;
     private final KafkaTemplate<String, VehiclePositionEvent> kafkaTemplate;
     private final Counter eventsProcessed;
@@ -40,11 +41,13 @@ public class VehiclePositionConsumer {
     public VehiclePositionConsumer(
             RedisService redisService,
             DatabaseService databaseService,
+            RedisPubSubService pubSubService,
             ProcessingProperties properties,
             KafkaTemplate<String, VehiclePositionEvent> kafkaTemplate,
             MeterRegistry meterRegistry) {
         this.redisService = redisService;
         this.databaseService = databaseService;
+        this.pubSubService = pubSubService;
         this.properties = properties;
         this.kafkaTemplate = kafkaTemplate;
         this.eventsProcessed = Counter.builder("routeforge.processing.events.processed")
