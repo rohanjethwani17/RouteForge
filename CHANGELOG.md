@@ -7,6 +7,101 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Phase 7: Production-Ready Admin Operations
+
+#### Real DLQ (Dead Letter Queue) Monitoring
+- **Kafka Admin Client Integration**: Real-time DLQ metrics using Kafka Admin API
+  - Actual message count calculation from partition offsets
+  - Per-partition offset details (earliest, latest, count)
+  - Topic partition count and health status
+  - Graceful error handling with fallback responses
+- **New Classes**:
+  - `KafkaAdminConfig.java`: Kafka Admin Client bean configuration
+  - Updated `AdminService.getDlqMetrics()`: Full implementation replacing placeholder
+- **Dependencies**: Added `spring-kafka` to api-gateway-service for AdminClient
+
+#### DLQ Replay Mechanism
+- **Complete Message Reprocessing Pipeline**:
+  - `DlqReplayService` in processing-service for consuming and reprocessing DLQ messages
+  - Temporary Kafka consumer with `earliest` offset reset
+  - Batch processing (100 messages per batch)
+  - Redis + PostgreSQL dual-write for replayed messages
+  - Redis Pub/Sub notifications for SSE updates
+  - Success/failure metrics tracking with Micrometer
+- **Inter-Service Communication**:
+  - REST endpoint `/internal/dlq/replay` in processing-service
+  - API Gateway calls processing-service to trigger replays
+  - Configurable max message limit parameter
+- **New Classes**:
+  - `DlqReplayService.java`: Core replay logic
+  - `DlqReplayController.java`: Internal REST endpoint
+  - `RestClientConfig.java`: Inter-service REST client configuration
+- **Configuration**:
+  - Added `PROCESSING_SERVICE_URL` environment variable
+  - Added `kafkaBootstrapServers` to ProcessingProperties
+
+#### Comprehensive Integration Tests
+- **Admin Endpoint Tests** (`AdminEndpointIntegrationTest.java`):
+  - Cache clearing operations (all and per-route)
+  - DLQ metrics retrieval with Kafka integration
+  - System statistics validation
+  - JWT authentication/authorization tests (401, 403)
+- **SSE Streaming Tests** (`SseStreamingIntegrationTest.java`):
+  - Connection establishment and heartbeat verification
+  - Vehicle update event delivery
+  - Multiple route stream isolation
+  - Redis-backed data validation
+- **DLQ Replay Tests** (`DlqReplayIntegrationTest.java`):
+  - Empty DLQ handling
+  - Full message reprocessing pipeline
+  - Max message limit enforcement
+  - End-to-end integration with Testcontainers
+- All tests use Testcontainers for real infrastructure (Kafka, Redis, PostgreSQL)
+
+#### Documentation Overhaul
+- **Updated README.md**:
+  - Corrected API documentation with accurate ports (8082)
+  - Added all admin endpoints with descriptions
+  - Updated endpoint paths to match actual implementation
+  - Added SSE streaming documentation
+- **Enhanced API.md**:
+  - Real DLQ metrics response schema with per-partition details
+  - Detailed DLQ replay mechanism documentation
+  - "How It Works" section for replay flow
+  - Error response examples for all admin endpoints
+- **Expanded KEYCLOAK.md**:
+  - Automated realm import documentation
+  - Pre-configured test user credentials
+  - Comprehensive JWT token acquisition guide
+  - Helper script usage (`./scripts/get-token.sh`)
+  - Testing examples for protected endpoints
+- **Improved QUICKSTART.md**:
+  - Added SSE streaming test examples
+  - Complete admin endpoints testing section
+  - JWT token usage examples
+  - Links to all web interfaces
+
+#### Configuration Improvements
+- **Comprehensive .env.example**:
+  - Added `PROCESSING_SERVICE_URL` for inter-service communication
+  - Optional JVM tuning parameters
+  - Optional logging configuration
+  - Database connection pool tuning options
+  - Kafka consumer tuning parameters
+- **Application Configuration**:
+  - Kafka bootstrap servers in api-gateway application.yml
+  - Processing service URL configuration
+  - All configurations use environment variables
+
+#### Testing Documentation
+- **test_result.md**: Complete testing guide including:
+  - Implementation summary for all phases
+  - Detailed testing protocol
+  - Expected responses for all endpoints
+  - Monitoring and observability validation
+  - Architecture diagrams
+  - Known limitations and future improvements
+
 ### Added - Phase 6: Infrastructure as Code & Final Documentation
 
 #### Terraform AWS Deployment
