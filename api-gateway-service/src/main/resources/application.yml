@@ -39,8 +39,6 @@ routeforge:
       refill-duration-sec: ${API_RATE_LIMIT_REFILL_DURATION_SEC:60}
 
 management:
-  server:
-    port: ${MANAGEMENT_PORT:8082}
   endpoints:
     web:
       exposure:
