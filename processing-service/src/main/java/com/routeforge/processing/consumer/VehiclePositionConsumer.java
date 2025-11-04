@@ -4,6 +4,7 @@ import com.routeforge.common.dto.VehiclePositionEvent;
 import com.routeforge.processing.config.ProcessingProperties;
 import com.routeforge.processing.service.DatabaseService;
 import com.routeforge.processing.service.RedisService;
+import com.routeforge.processing.service.RedisPubSubService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
