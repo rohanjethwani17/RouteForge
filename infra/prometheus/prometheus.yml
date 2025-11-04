@@ -5,6 +5,16 @@ global:
     cluster: 'routeforge-local'
     environment: 'development'
 
+# Alert rules
+rule_files:
+  - 'alerts.yml'
+
+# Alertmanager configuration (optional)
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
 scrape_configs:
   # API Gateway Service
   - job_name: 'api-gateway-service'
