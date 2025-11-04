@@ -61,7 +61,7 @@ services:
       timeout: 3s
       retries: 5
 
-  # Keycloak for OAuth2
+  # Keycloak for OAuth2 (automated realm import)
   keycloak:
     image: quay.io/keycloak/keycloak:23.0
     container_name: routeforge-keycloak
@@ -73,7 +73,9 @@ services:
       KC_DB: dev-file
     command:
       - start-dev
+      - --import-realm
     volumes:
+      - ./infra/keycloak/routeforge-realm.json:/opt/keycloak/data/import/routeforge-realm.json
       - keycloak-data:/opt/keycloak/data
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
