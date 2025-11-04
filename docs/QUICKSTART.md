@@ -153,7 +153,7 @@ docker exec routeforge-kafka kafka-console-consumer \
 
 ## Next Steps
 
-1. **Explore the API:** Visit http://localhost:8081/swagger-ui.html
+1. **Explore the API:** Visit http://localhost:8082/swagger-ui.html
 2. **View Metrics:** Open Grafana at http://localhost:3000
 3. **Read the Docs:** Check out [DESIGN.md](DESIGN.md) and [API.md](API.md)
 4. **Run Tests:** `./gradlew test`
