@@ -1,0 +1,6 @@
+rootProject.name = 'routeforge'
+
+include 'routeforge-common'
+include 'ingestion-service'
+include 'processing-service'
+include 'api-gateway-service'
