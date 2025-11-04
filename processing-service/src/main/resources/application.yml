@@ -56,6 +56,7 @@ routeforge:
     dlq-topic: ${KAFKA_TOPIC_DLQ:vehicle_positions.dlq}
     batch-size: 50
     batch-timeout-ms: 5000
+    kafka-bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
   redis:
     host: ${REDIS_HOST:localhost}
     port: ${REDIS_PORT:6379}
