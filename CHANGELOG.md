@@ -7,6 +7,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Phase 1: Real-Time Streaming with SSE
+
+#### Server-Sent Events (SSE) Implementation
+- **New Endpoint**: `GET /api/stream/routes/{routeId}`
+  - Opens persistent SSE connection for real-time vehicle updates
+  - 30-minute timeout with automatic cleanup
+  - Heartbeat every 15 seconds to keep connections alive
+  - Event types: `connected`, `vehicle-update`, `heartbeat`
+
+#### Redis Pub/Sub Fan-Out
+- **Processing Service**: Publishes update notifications after successful Redis/DB write
+  - Channel pattern: `route:{routeId}:updates`
+  - Notification payload: `{routeId, vehicleId, updatedAt}`
+  - New metric: `routeforge.processing.pubsub.published`
+
+- **API Gateway**: Subscribes to route update channels
+  - Pattern subscription: `route:*:updates`
+  - Fetches fresh vehicle data from Redis on notification
+  - Fans out to all SSE clients subscribed to that route
+
+#### SSE Connection Management
+- `SseEmitterManager`: Thread-safe management of active connections
+- `RedisSubscriberService`: Background Pub/Sub subscriber
+- `SseHeartbeatScheduler`: Scheduled heartbeat to detect dead connections
+- `VehicleStreamController`: REST endpoint for SSE streaming
+
+#### New Metrics
+- `routeforge.sse.emitters.created` - Total SSE emitters created
+- `routeforge.sse.emitters.removed` - Total SSE emitters removed
+- `routeforge.sse.messages.sent` - Total messages sent via SSE
+- `routeforge.sse.messages.failed` - Failed SSE message attempts
+- `routeforge.sse.active.connections` - Current active connections (gauge)
+
+#### Documentation Updates
+- Added SSE endpoint to API.md with JavaScript client example
+- Updated DESIGN.md with real-time streaming architecture
+- Documented fan-out pattern and connection lifecycle
+
+#### Security
+- SSE endpoint `/api/stream/**` open in dev profile
+- Rate limiting applies to SSE connections
+- OAuth2/JWT protection available in prod profile
+
 ### Changed - Phase 0: Config Hygiene & Port Alignment
 
 #### Service Port Standardization
