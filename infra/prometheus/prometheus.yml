@@ -6,29 +6,35 @@ global:
     environment: 'development'
 
 scrape_configs:
-  # Ingestion Service
-  - job_name: 'ingestion-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: ['host.docker.internal:8083']
-        labels:
-          service: 'ingestion-service'
-
-  # Processing Service
-  - job_name: 'processing-service'
-    metrics_path: '/actuator/prometheus'
-    static_configs:
-      - targets: ['host.docker.internal:8084']
-        labels:
-          service: 'processing-service'
-
   # API Gateway Service
   - job_name: 'api-gateway-service'
     metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
     static_configs:
       - targets: ['host.docker.internal:8082']
         labels:
           service: 'api-gateway-service'
+          application: 'routeforge'
+
+  # Ingestion Service
+  - job_name: 'ingestion-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['host.docker.internal:8083']
+        labels:
+          service: 'ingestion-service'
+          application: 'routeforge'
+
+  # Processing Service
+  - job_name: 'processing-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s
+    static_configs:
+      - targets: ['host.docker.internal:8084']
+        labels:
+          service: 'processing-service'
+          application: 'routeforge'
 
   # Prometheus self-monitoring
   - job_name: 'prometheus'
