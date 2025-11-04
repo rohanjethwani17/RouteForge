@@ -46,6 +46,8 @@ public class SecurityConfig {
                 ).permitAll()
                 // Public read endpoints (rate-limited)
                 .requestMatchers("/api/routes/**", "/api/vehicles/**").permitAll()
+                // SSE streaming endpoints
+                .requestMatchers("/api/stream/**").permitAll()
                 // WebSocket
                 .requestMatchers("/ws/**").permitAll()
                 // Admin endpoints require authentication
