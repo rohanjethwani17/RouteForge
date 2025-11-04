@@ -198,6 +198,52 @@ CREATE INDEX idx_route_ts ON vehicle_positions_history(route_id, ts_epoch_ms DES
 - Recent data available via API
 - Historical queries fail
 
+## Real-Time Streaming Architecture
+
+### Server-Sent Events (SSE)
+
+RouteForge uses SSE for unidirectional real-time updates from server to clients. SSE was chosen over WebSocket for:
+- Simpler implementation (HTTP-based, no protocol upgrade)
+- Better for read-only updates (vehicle positions)
+- Automatic reconnection in browsers
+- Works through HTTP proxies and firewalls
+- Lower overhead than WebSocket for our use case
+
+### Fan-Out Pattern
+
+```
+Processing Service                  API Gateway              Clients
+      ↓                                   ↓                    ↓
+Redis+DB Write                    Redis Subscriber      SSE Emitters
+      ↓                                   ↓                    ↓
+Redis Pub/Sub                     Vehicle Fetch         Event Stream
+ (notify)                          (from Redis)          (JSON events)
+
+Timeline:
+1. Vehicle position updated in Redis/DB
+2. Notification published: route:{routeId}:updates
+3. API Gateway subscribers receive notification
+4. Fresh vehicle data fetched from Redis
+5. Data sent to all SSE clients subscribed to that route
+```
+
+### Connection Management
+
+- **Timeout**: 30 minutes of inactivity
+- **Heartbeat**: Every 15 seconds to detect dead connections
+- **Backpressure**: Buffer limited; drops oldest events on overflow
+- **Lifecycle**: Auto-cleanup on timeout/error/completion
+- **Metrics**: Active connections, messages sent/failed
+
+### Scalability
+
+**Single Instance**: Redis Pub/Sub with in-memory emitter management
+
+**Multi-Instance**: 
+- Option 1: Sticky sessions (route clients to same instance)
+- Option 2: Shared state via Redis (store emitter metadata)
+- Current: Single-instance suitable for MVP; sticky sessions for scale
+
 ## Observability
 
 ### Metrics (Prometheus)
@@ -208,6 +254,14 @@ routeforge_ingestion_events_published{}
 routeforge_processing_events_processed{}
 routeforge_processing_cache_updates{}
 routeforge_processing_db_inserts{}
+routeforge_processing_pubsub_published{}
+
+# SSE metrics
+routeforge_sse_emitters_created{}
+routeforge_sse_emitters_removed{}
+routeforge_sse_messages_sent{}
+routeforge_sse_messages_failed{}
+routeforge_sse_active_connections{}
 
 # Infrastructure metrics
 http_server_requests_seconds{quantile="0.95"}
