@@ -71,9 +71,10 @@ GTFS-RT → Ingestion → Kafka → Processing → Redis + DB
 - Kafka consumer with manual offset management
 - Batch processing (50 events per batch)
 - Dual-write: Redis for hot state, PostgreSQL for history
+- Redis Pub/Sub publisher for real-time notifications
 - Out-of-order detection using timestamps
 - Dead-letter queue for failed events
-- Metrics: events processed, cache updates, DB inserts, DLQ count
+- Metrics: events processed, cache updates, DB inserts, DLQ count, Pub/Sub notifications
 
 #### API Gateway Service
 - REST endpoints for vehicle queries
