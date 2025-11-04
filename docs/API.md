@@ -66,7 +66,7 @@ Retrieve all active vehicles currently serving a route.
 
 **Example Request:**
 ```bash
-curl http://localhost:8081/api/routes/1/vehicles
+curl http://localhost:8082/api/routes/1/vehicles
 ```
 
 **Response:** `200 OK`
