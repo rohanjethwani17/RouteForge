@@ -67,6 +67,7 @@ class SseStreamingIntegrationTest {
         registry.add("routeforge.redis.port", () -> redis.getMappedPort(6379).toString());
         registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", 
             () -> "http://localhost:8080/realms/test");
+        registry.add("spring.profiles.active", () -> "dev");
     }
     
     @BeforeEach

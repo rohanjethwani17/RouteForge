@@ -64,6 +64,7 @@ class DlqReplayIntegrationTest {
         registry.add("routeforge.redis.host", redis::getHost);
         registry.add("routeforge.redis.port", () -> redis.getMappedPort(6379).toString());
         registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers);
+        registry.add("spring.profiles.active", () -> "dev");
     }
     
     @BeforeEach

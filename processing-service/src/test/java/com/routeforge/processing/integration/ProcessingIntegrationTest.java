@@ -61,6 +61,7 @@ class ProcessingIntegrationTest {
         registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("routeforge.redis.host", redis::getHost);
         registry.add("routeforge.redis.port", redis::getFirstMappedPort);
+        registry.add("spring.profiles.active", () -> "dev");
     }
     
     @Autowired

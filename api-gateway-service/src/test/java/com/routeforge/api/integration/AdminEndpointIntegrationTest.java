@@ -59,6 +59,7 @@ class AdminEndpointIntegrationTest {
         registry.add("routeforge.kafka.bootstrap-servers", kafka::getBootstrapServers);
         registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri", 
             () -> "http://localhost:8080/realms/test");
+        registry.add("spring.profiles.active", () -> "dev");
     }
     
     @BeforeEach
