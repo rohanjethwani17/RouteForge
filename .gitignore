@@ -8,10 +8,13 @@ build/
 # Java
 *.class
 *.log
-*.jar
 *.war
 *.ear
 hs_err_pid*
+
+# JAR files (but allow gradle wrapper)
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
 
 # IDE
 .idea/
