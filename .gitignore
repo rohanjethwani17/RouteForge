@@ -28,9 +28,13 @@ target/
 *.log
 spring-boot-*.log
 
-# Environment
+# Environment - Ignore actual .env but keep .env.example
 .env
 *.env.local
+*.env.production
+*.env.development
+*.env.test
+# IMPORTANT: .env.example should be committed to Git (not ignored)
 
 # Docker
 *.pid
@@ -51,39 +55,3 @@ docker-compose.override.yml
 *.bak
 *.swp
 node_modules/
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
