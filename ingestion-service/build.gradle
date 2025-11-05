@@ -3,6 +3,10 @@ plugins {
     id 'java'
 }
 
+bootBuildImage {
+    imageName = "routeforge/ingestion-service:latest"
+}
+
 dependencies {
     // Internal modules
     implementation project(':routeforge-common')
