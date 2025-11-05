@@ -194,13 +194,13 @@ public class AdminService {
         // Assuming ~20 messages per minute average (rough estimate)
         int maxMessages = minutes * 20;
         
+        java.net.HttpURLConnection conn = null;
         try {
             // Call processing service internal endpoint using configured URL
             String url = processingServiceUrl + "/internal/dlq/replay?maxMessages=" + maxMessages;
             
             // Make REST call (simple approach without RestClient for now)
-            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) 
-                new java.net.URL(url).openConnection();
+            conn = (java.net.HttpURLConnection) new java.net.URL(url).openConnection();
             conn.setRequestMethod("POST");
             conn.setConnectTimeout(5000);
             conn.setReadTimeout(30000);
@@ -218,6 +218,10 @@ public class AdminService {
         } catch (Exception e) {
             log.error("Failed to trigger DLQ replay", e);
             return false;
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
         }
     }
     

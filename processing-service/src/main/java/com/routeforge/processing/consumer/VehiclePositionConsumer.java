@@ -17,7 +17,9 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,7 +38,16 @@ public class VehiclePositionConsumer {
     private final KafkaTemplate<String, VehiclePositionEvent> kafkaTemplate;
     private final Counter eventsProcessed;
     private final Counter eventsFailed;
-    private final Map<String, Long> vehicleLastTimestamp = new HashMap<>();
+    private static final int MAX_CACHE_SIZE = 100_000;
+    
+    private final Map<String, Long> vehicleLastTimestamp = 
+        Collections.synchronizedMap(
+            new LinkedHashMap<String, Long>(16, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, Long> eldest) {
+                    return size() > MAX_CACHE_SIZE;
+                }
+            });
     
     public VehiclePositionConsumer(
             RedisService redisService,
@@ -133,11 +144,9 @@ public class VehiclePositionConsumer {
      * Publish update notifications via Redis Pub/Sub for SSE streaming
      */
     private void publishUpdateNotifications(List<VehiclePositionEvent> events) {
-        Map<String, String> routeVehicleMap = new HashMap<>();
         for (VehiclePositionEvent event : events) {
-            routeVehicleMap.put(event.getRouteId(), event.getVehicleId());
+            pubSubService.publishRouteUpdate(event.getRouteId(), event.getVehicleId());
         }
-        pubSubService.publishBulkRouteUpdates(routeVehicleMap);
     }
     
     /**
