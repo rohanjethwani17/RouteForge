@@ -73,16 +73,30 @@ public class VehicleService {
     }
     
     private VehicleResponse mapToVehicleResponse(Map<String, String> fields) {
+    String latStr = fields.get("lat");
+    String lonStr = fields.get("lon");
+    String tsStr  = fields.get("tsEpochMs");
+
+    // Validate presence of required fields
+    if (latStr == null || lonStr == null || tsStr == null) {
+        log.warn("Missing required fields for vehicle: {}", fields);
+        throw new IllegalArgumentException("Missing required vehicle fields");
+    }
+
+    try {
         return VehicleResponse.builder()
             .vehicleId(fields.get("vehicleId"))
             .routeId(fields.get("routeId"))
-            .lat(Double.parseDouble(fields.get("lat")))
-            .lon(Double.parseDouble(fields.get("lon")))
-            .speedKph(fields.containsKey("speedKph") ? Double.parseDouble(fields.get("speedKph")) : null)
+            .lat(Double.parseDouble(latStr))
+            .lon(Double.parseDouble(lonStr))
+            .speedKph(fields.containsKey("speedKph")   ? Double.parseDouble(fields.get("speedKph")) : null)
             .headingDeg(fields.containsKey("headingDeg") ? Double.parseDouble(fields.get("headingDeg")) : null)
-            .timestamp(Instant.ofEpochMilli(Long.parseLong(fields.get("tsEpochMs"))))
+            .timestamp(Instant.ofEpochMilli(Long.parseLong(tsStr)))
             .stopId(fields.get("stopId"))
-            .delaySec(fields.containsKey("delaySec") ? Integer.parseInt(fields.get("delaySec")) : null)
+            .delaySec(fields.containsKey("delaySec")   ? Integer.parseInt(fields.get("delaySec")) : null)
             .build();
+    } catch (NumberFormatException e) {
+        log.warn("Invalid numeric data in Redis fields: {}", fields, e);
+        throw new IllegalArgumentException("Invalid numeric data in Redis", e);
     }
 }
