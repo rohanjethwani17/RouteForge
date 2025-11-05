@@ -90,8 +90,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Kafka consumer tuning parameters
 - **Application Configuration**:
   - Kafka bootstrap servers in api-gateway application.yml
-  - Processing service URL configuration
+  - Processing service URL configuration (uses `${routeforge.processing-service.url}`)
   - All configurations use environment variables
+- **Fixed Hard-coded URL**:
+  - `AdminService.triggerIngestionReplay()` now reads from configuration
+  - Previously used hard-coded `http://localhost:8084`
+  - Now configurable via `PROCESSING_SERVICE_URL` environment variable
 
 #### Testing Documentation
 - **test_result.md**: Complete testing guide including:
