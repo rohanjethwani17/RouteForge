@@ -176,30 +176,29 @@ jobs:
     - name: List built images
       run: docker images
     
-    - name: Tag images for Docker Hub
-      if: github.event_name == 'push' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
+    - name: Tag and push images (if credentials available)
+      if: github.event_name == 'push'
+        # Tag images for Docker Hub
       run: |
         docker tag ingestion-service:latest routeforge/ingestion-service:latest
         docker tag processing-service:latest routeforge/processing-service:latest
         docker tag api-gateway-service:latest routeforge/api-gateway-service:latest
     
-    - name: Log in to Docker Hub
-      if: github.event_name == 'push' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKER_USERNAME }}
-        password: ${{ secrets.DOCKER_PASSWORD }}
-    
-    - name: Push images
-      if: github.event_name == 'push' && secrets.DOCKER_USERNAME != '' && secrets.DOCKER_PASSWORD != ''
-      run: |
-        docker push routeforge/ingestion-service:latest
-        docker push routeforge/processing-service:latest
-        docker push routeforge/api-gateway-service:latest
-
-    - name: Docker build completed
-      if: github.event_name == 'push' && (secrets.DOCKER_USERNAME == '' || secrets.DOCKER_PASSWORD == '')
-      run: |
-        echo "✅ Docker images built successfully"
-        echo "ℹ️  Docker Hub credentials not configured - skipping push"
-        echo "   To enable pushing: Set DOCKER_USERNAME and DOCKER_PASSWORD secrets in repository settings"
+        # Check if Docker Hub credentials are available
+        if [ -n "${{ secrets.DOCKER_USERNAME }}" ] && [ -n "${{ secrets.DOCKER_PASSWORD }}" ]; then
+          echo "Docker Hub credentials found - logging in and pushing images..."
+          
+          # Login to Docker Hub
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+          
+          # Push images
+          docker push routeforge/ingestion-service:latest
+          docker push routeforge/processing-service:latest
+          docker push routeforge/api-gateway-service:latest
+          
+          echo "✅ Images pushed to Docker Hub successfully"
+        else
+          echo "✅ Docker images built and tagged successfully"
+          echo "ℹ️  Docker Hub credentials not configured - skipping push"
+          echo "   To enable pushing: Set DOCKER_USERNAME and DOCKER_PASSWORD secrets in repository settings"
+        fi
