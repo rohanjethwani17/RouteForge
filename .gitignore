@@ -25,16 +25,15 @@ hs_err_pid*
 
 # Spring Boot
 target/
-*.log
 spring-boot-*.log
 
-# Environment - Ignore actual .env but keep .env.example
+# Environment - Ignore actual .env but NOT .env.example
 .env
-*.env.local
-*.env.production
-*.env.development
-*.env.test
-# IMPORTANT: .env.example should be committed to Git (not ignored)
+.env.local
+.env.production
+.env.development
+.env.test
+# .env.example should be committed to Git
 
 # Docker
 *.pid
@@ -53,9 +52,4 @@ docker-compose.override.yml
 # Misc
 *.tmp
 *.bak
-*.swp
 node_modules/
--e 
-# Environment files
-*.env
-*.env.*
