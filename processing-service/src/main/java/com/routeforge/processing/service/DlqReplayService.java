@@ -83,27 +83,32 @@ public class DlqReplayService {
             for (ConsumerRecord<String, VehiclePositionEvent> record : records) {
                 eventsToProcess.add(record.value());
                 processedCount++;
-                
-                // Process in batches of 100 or when max is reached
-                if (eventsToProcess.size() >= 100 || 
+            
+                if (eventsToProcess.size() >= 100 ||
                     (maxMessages > 0 && processedCount >= maxMessages)) {
                     int batchSuccess = processBatch(eventsToProcess);
                     successCount += batchSuccess;
                     failureCount += (eventsToProcess.size() - batchSuccess);
                     eventsToProcess.clear();
+            
+                    // ✅ commit offsets for processed records
+                    consumer.commitSync();
                 }
-                
+            
                 if (maxMessages > 0 && processedCount >= maxMessages) {
                     break;
                 }
             }
             
-            // Process remaining events
+            // Process any remaining events
             if (!eventsToProcess.isEmpty()) {
                 int batchSuccess = processBatch(eventsToProcess);
                 successCount += batchSuccess;
                 failureCount += (eventsToProcess.size() - batchSuccess);
+                // ✅ commit offsets after final batch
+                consumer.commitSync();
             }
+
             
             log.info("DLQ replay completed: success={}, failure={}", successCount, failureCount);
             
