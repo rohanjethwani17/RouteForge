@@ -12,11 +12,12 @@ import org.apache.kafka.common.TopicPartition;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.ScanParams;
-import redis.clients.jedis.ScanResult;
+import redis.clients.jedis.params.ScanParams;
+import redis.clients.jedis.resps.ScanResult;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -70,7 +71,7 @@ public class AdminService {
             String routeKey = "route:" + routeId + ":vehicles";
     
             // Fetch all vehicle IDs first
-            Set<String> vehicleIds = jedis.zrange(routeKey, 0, -1);
+            List<String> vehicleIds = jedis.zrange(routeKey, 0, -1);
     
             // Delete the route set itself if it exists
             if (jedis.exists(routeKey)) {

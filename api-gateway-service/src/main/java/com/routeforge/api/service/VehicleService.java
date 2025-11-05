@@ -51,7 +51,7 @@ public class VehicleService {
             String routeKey = "route:" + routeId + ":vehicles";
             
             // Get vehicle IDs from sorted set (most recent first)
-            Set<String> vehicleIds = jedis.zrevrange(routeKey, 0, -1);
+            List<String> vehicleIds = jedis.zrevrange(routeKey, 0, -1);
             
             if (vehicleIds.isEmpty()) {
                 log.debug("No vehicles found for route: {}", routeId);
@@ -99,4 +99,5 @@ public class VehicleService {
         log.warn("Invalid numeric data in Redis fields: {}", fields, e);
         throw new IllegalArgumentException("Invalid numeric data in Redis", e);
     }
+}
 }

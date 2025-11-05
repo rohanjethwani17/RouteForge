@@ -79,8 +79,8 @@ public class GtfsRealtimeParser {
             .eventId(eventId)
             .vehicleId(vehicleId)
             .routeId(routeId)
-            .lat(pos.getLatitude())
-            .lon(pos.getLongitude())
+            .lat((double) pos.getLatitude())
+            .lon((double) pos.getLongitude())
             .speedKph(pos.hasSpeed() ? (double) pos.getSpeed() * 3.6 : null) // m/s to km/h
             .headingDeg(pos.hasBearing() ? (double) pos.getBearing() : null)
             .tsEpochMs(timestamp)

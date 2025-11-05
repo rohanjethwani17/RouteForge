@@ -37,7 +37,7 @@ public class GtfsRealtimeFetcher {
             byte[] feedData = webClient.get()
                 .uri(properties.getFeedUrl())
                 .retrieve()
-                .onStatus(HttpStatus::isError, response -> {
+                .onStatus(status -> status.isError(), response -> {
                     log.error("HTTP error fetching feed: {}", response.statusCode());
                     return Mono.error(new RuntimeException("HTTP error: " + response.statusCode()));
                 })
