@@ -176,14 +176,10 @@ jobs:
     - name: List built images
       run: docker images
     
-    - name: Tag and push images (if credentials available)
+    - name: Push images (if credentials available)
       if: github.event_name == 'push'
         # Tag images for Docker Hub
       run: |
-        docker tag ingestion-service:latest routeforge/ingestion-service:latest
-        docker tag processing-service:latest routeforge/processing-service:latest
-        docker tag api-gateway-service:latest routeforge/api-gateway-service:latest
-    
         # Check if Docker Hub credentials are available
         if [ -n "${{ secrets.DOCKER_USERNAME }}" ] && [ -n "${{ secrets.DOCKER_PASSWORD }}" ]; then
           echo "Docker Hub credentials found - logging in and pushing images..."
