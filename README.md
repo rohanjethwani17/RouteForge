@@ -40,9 +40,14 @@ GTFS-RT Feed → Ingestion Service → Kafka → Processing Service → Redis (h
 ### 1. Clone and Configure
 
 ```bash
+# Copy the environment configuration template
 cp .env.example .env
+
 # Edit .env if needed (defaults work for local development)
+# The .env.example file includes all required variables with sensible defaults
 ```
+
+> **📝 Note:** `.env.example` includes all environment variables with defaults for local development. See [Configuration](#-configuration) below for details.
 
 ### 2. Start Infrastructure
 
