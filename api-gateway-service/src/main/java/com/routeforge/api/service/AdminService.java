@@ -196,8 +196,8 @@ public class AdminService {
         int maxMessages = minutes * 20;
         
         try {
-            // Call processing service internal endpoint
-            String url = "http://localhost:8084/internal/dlq/replay?maxMessages=" + maxMessages;
+            // Call processing service internal endpoint using configured URL
+            String url = processingServiceUrl + "/internal/dlq/replay?maxMessages=" + maxMessages;
             
             // Make REST call (simple approach without RestClient for now)
             java.net.HttpURLConnection conn = (java.net.HttpURLConnection) 
