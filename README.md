@@ -223,7 +223,3 @@ Apache License 2.0 - see [LICENSE](LICENSE)
 ## 🤝 Contributing
 
 Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md)
-
----
-
-**Built with ❤️ for the transit community**
