@@ -64,7 +64,7 @@ jobs:
       run: chmod +x gradlew
     
     - name: Run integration tests with Testcontainers
-       run: ./gradlew :api-gateway-service:test :processing-service:test --tests "*IntegrationTest" --no-daemon
+      run: ./gradlew :api-gateway-service:test :processing-service:test --tests "*IntegrationTest" --no-daemon
       env:
         TESTCONTAINERS_RYUK_DISABLED: false
     
