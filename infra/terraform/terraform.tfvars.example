@@ -1,0 +1,28 @@
+# RouteForge Terraform Configuration Example
+# Copy this file to terraform.tfvars and customize
+
+project_name = "routeforge"
+environment  = "production"
+aws_region   = "us-east-1"
+
+# VPC Configuration
+vpc_cidr = "10.0.0.0/16"
+
+# RDS PostgreSQL Configuration
+db_instance_class    = "db.t3.micro"      # Use db.m5.large for production
+db_allocated_storage = 20                 # GB, increase for production
+db_password          = "CHANGE_ME_SECURE_PASSWORD"
+
+# ElastiCache Redis Configuration
+redis_node_type = "cache.t3.micro"        # Use cache.m5.large for production
+
+# MSK Kafka Configuration
+kafka_instance_type = "kafka.t3.small"    # Use kafka.m5.large for production
+kafka_broker_count  = 2                   # Minimum 2 for HA
+
+# ECS Fargate Configuration
+ecs_task_cpu    = "256"                   # 0.25 vCPU (use 512+ for production)
+ecs_task_memory = "512"                   # 0.5 GB (use 1024+ for production)
+
+# Cost Estimate with these settings: ~$200-250/month
+# Production settings would be ~$500-800/month

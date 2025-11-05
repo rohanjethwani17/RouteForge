@@ -1,0 +1,123 @@
+{
+  "realm": "routeforge",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "clients": [
+    {
+      "clientId": "routeforge-api",
+      "name": "RouteForge API Client",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "routeforge-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "access.token.lifespan": "300"
+      },
+      "redirectUris": [
+        "http://localhost:8082/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "http://localhost:8082",
+        "http://localhost:3000"
+      ],
+      "defaultClientScopes": [
+        "email",
+        "profile",
+        "roles"
+      ],
+      "optionalClientScopes": [
+        "admin"
+      ]
+    }
+  ],
+  "clientScopes": [
+    {
+      "name": "admin",
+      "description": "Admin scope for administrative operations",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true"
+      }
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN",
+        "description": "Administrator role with full access"
+      },
+      {
+        "name": "VIEWER",
+        "description": "Viewer role with read-only access"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@routeforge.io",
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "ADMIN",
+        "VIEWER"
+      ],
+      "clientRoles": {
+        "routeforge-api": []
+      }
+    },
+    {
+      "username": "viewer",
+      "enabled": true,
+      "email": "viewer@routeforge.io",
+      "emailVerified": true,
+      "firstName": "Viewer",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "viewer123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "VIEWER"
+      ],
+      "clientRoles": {
+        "routeforge-api": []
+      }
+    }
+  ],
+  "scopeMappings": [
+    {
+      "clientScope": "admin",
+      "roles": [
+        "ADMIN"
+      ]
+    }
+  ],
+  "defaultDefaultClientScopes": [
+    "email",
+    "profile",
+    "roles"
+  ]
+}

@@ -1,0 +1,153 @@
+groups:
+  - name: routeforge_alerts
+    interval: 30s
+    rules:
+      # Service Health Alerts
+      - alert: ServiceDown
+        expr: up{job=~".*-service"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: "{{ $labels.service }}"
+        annotations:
+          summary: "RouteForge service is down"
+          description: "Service {{ $labels.service }} has been down for more than 2 minutes."
+          
+      # API Performance Alerts
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{job="api-gateway-service"}[5m])) > 0.2
+        for: 5m
+        labels:
+          severity: warning
+          component: api-gateway
+        annotations:
+          summary: "High API latency detected"
+          description: "API Gateway p95 latency is {{ $value }}s (threshold: 0.2s)"
+          
+      - alert: CriticalAPILatency
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket{job="api-gateway-service"}[5m])) > 0.5
+        for: 3m
+        labels:
+          severity: critical
+          component: api-gateway
+        annotations:
+          summary: "Critical API latency"
+          description: "API Gateway p95 latency is {{ $value }}s (threshold: 0.5s)"
+          
+      # Kafka Consumer Lag Alerts
+      - alert: HighConsumerLag
+        expr: kafka_consumer_records_lag{group="processing-service-group"} > 1000
+        for: 5m
+        labels:
+          severity: warning
+          component: processing
+        annotations:
+          summary: "High Kafka consumer lag"
+          description: "Consumer lag is {{ $value }} messages (threshold: 1000)"
+          
+      - alert: CriticalConsumerLag
+        expr: kafka_consumer_records_lag{group="processing-service-group"} > 5000
+        for: 3m
+        labels:
+          severity: critical
+          component: processing
+        annotations:
+          summary: "Critical Kafka consumer lag"
+          description: "Consumer lag is {{ $value }} messages (threshold: 5000). Data processing is severely behind."
+          
+      # Error Rate Alerts
+      - alert: HighErrorRate
+        expr: rate(routeforge_processing_events_failed_total[5m]) / rate(routeforge_processing_events_processed_total[5m]) > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          component: processing
+        annotations:
+          summary: "High event processing error rate"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 1%)"
+          
+      - alert: CriticalErrorRate
+        expr: rate(routeforge_processing_events_failed_total[5m]) / rate(routeforge_processing_events_processed_total[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: critical
+          component: processing
+        annotations:
+          summary: "Critical event processing error rate"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+          
+      # DLQ Accumulation
+      - alert: DLQMessagesAccumulating
+        expr: increase(routeforge_processing_events_failed_total[10m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          component: processing
+        annotations:
+          summary: "DLQ messages accumulating"
+          description: "{{ $value }} messages sent to DLQ in last 10 minutes"
+          
+      # Ingestion Stalled
+      - alert: IngestionStalled
+        expr: rate(routeforge_ingestion_events_published_total[5m]) == 0
+        for: 10m
+        labels:
+          severity: critical
+          component: ingestion
+        annotations:
+          summary: "Vehicle position ingestion stalled"
+          description: "No events published to Kafka in the last 10 minutes. GTFS-RT feed may be down."
+          
+      # Redis Cache Issues
+      - alert: RedisCacheErrors
+        expr: rate(routeforge_processing_cache_errors_total[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+          component: processing
+        annotations:
+          summary: "Redis cache errors detected"
+          description: "{{ $value }} cache errors per second. Redis may be unavailable."
+          
+      # SSE Connection Issues
+      - alert: HighSSEFailureRate
+        expr: rate(routeforge_sse_messages_failed_total[5m]) / rate(routeforge_sse_messages_sent_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: api-gateway
+        annotations:
+          summary: "High SSE message failure rate"
+          description: "{{ $value | humanizePercentage }} of SSE messages are failing"
+          
+      # JVM Memory Alerts
+      - alert: HighJVMMemoryUsage
+        expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          component: "{{ $labels.application }}"
+        annotations:
+          summary: "High JVM heap memory usage"
+          description: "JVM heap usage is {{ $value | humanizePercentage }} on {{ $labels.application }}"
+          
+      - alert: CriticalJVMMemoryUsage
+        expr: (jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"}) > 0.95
+        for: 2m
+        labels:
+          severity: critical
+          component: "{{ $labels.application }}"
+        annotations:
+          summary: "Critical JVM heap memory usage"
+          description: "JVM heap usage is {{ $value | humanizePercentage }} on {{ $labels.application }}. Service may OOM soon."
+          
+      # Throughput Degradation
+      - alert: LowEventThroughput
+        expr: rate(routeforge_processing_events_processed_total[5m]) < 1
+        for: 10m
+        labels:
+          severity: warning
+          component: processing
+        annotations:
+          summary: "Low event processing throughput"
+          description: "Processing only {{ $value }} events/second (expected: >10/s)"

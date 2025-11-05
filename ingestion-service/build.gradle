@@ -1,0 +1,35 @@
+plugins {
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'java'
+}
+
+dependencies {
+    // Internal modules
+    implementation project(':routeforge-common')
+    
+    // Spring Boot
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.kafka:spring-kafka'
+    
+    // GTFS Realtime
+    implementation "com.google.transit:gtfs-realtime-bindings:0.0.4"
+    implementation 'com.google.protobuf:protobuf-java:3.25.1'
+    
+    // HTTP Client
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    
+    // Resilience
+    implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.1.0'
+    implementation 'io.github.resilience4j:resilience4j-circuitbreaker:2.1.0'
+    implementation 'io.github.resilience4j:resilience4j-retry:2.1.0'
+    
+    // Metrics
+    implementation "io.micrometer:micrometer-registry-prometheus:${property('micrometer-prometheus')}"
+    
+    // Test
+    testImplementation 'org.springframework.kafka:spring-kafka-test'
+    testImplementation "org.testcontainers:testcontainers:${testcontainersVersion}"
+    testImplementation "org.testcontainers:kafka:${testcontainersVersion}"
+    testImplementation "org.testcontainers:junit-jupiter:${testcontainersVersion}"
+}
