@@ -82,7 +82,7 @@ class VehicleServiceTest {
     void testGetVehiclesByRoute_MultipleVehicles() {
         // Given
         String routeId = "1";
-        Set<String> vehicleIds = Set.of("VEHICLE_123", "VEHICLE_124");
+        List<String> vehicleIds = List.of("VEHICLE_123", "VEHICLE_124");
         
         when(jedis.zrevrange("route:" + routeId + ":vehicles", 0, -1))
             .thenReturn(vehicleIds);
@@ -119,7 +119,7 @@ class VehicleServiceTest {
         // Given
         String routeId = "EMPTY_ROUTE";
         when(jedis.zrevrange("route:" + routeId + ":vehicles", 0, -1))
-            .thenReturn(Set.of());
+            .thenReturn(List.of());
         
         // When
         List<VehicleResponse> results = vehicleService.getVehiclesByRoute(routeId);
