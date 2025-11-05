@@ -34,6 +34,9 @@ public class AdminService {
     private final AdminClient kafkaAdminClient;
     private final KafkaAdminConfig kafkaAdminConfig;
     
+    @org.springframework.beans.factory.annotation.Value("${routeforge.processing-service.url:http://localhost:8084}")
+    private String processingServiceUrl;
+    
     /**
      * Clear all vehicle and route cache keys from Redis
      * Returns number of keys deleted
