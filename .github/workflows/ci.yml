@@ -170,16 +170,20 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
     
-    - name: Build Docker images
+    - name: Build Docker images with dynamic naming
       run: ./gradlew bootBuildImage --no-daemon
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME || 'routeforge' }}
 
     - name: List built images
       run: docker images
     
     - name: Push images (if credentials available)
       if: github.event_name == 'push'
-        # Tag images for Docker Hub
       run: |
+        # Set username for image names
+        DOCKER_USER="${{ secrets.DOCKER_USERNAME || 'routeforge' }}"
+        
         # Check if Docker Hub credentials are available
         if [ -n "${{ secrets.DOCKER_USERNAME }}" ] && [ -n "${{ secrets.DOCKER_PASSWORD }}" ]; then
           echo "Docker Hub credentials found - logging in and pushing images..."
@@ -187,14 +191,15 @@ jobs:
           # Login to Docker Hub
           echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
           
-          # Push images
-          docker push routeforge/ingestion-service:latest
-          docker push routeforge/processing-service:latest
-          docker push routeforge/api-gateway-service:latest
+          # Push images with correct username
+          docker push ${DOCKER_USER}/ingestion-service:latest
+          docker push ${DOCKER_USER}/processing-service:latest
+          docker push ${DOCKER_USER}/api-gateway-service:latest
           
           echo "✅ Images pushed to Docker Hub successfully"
         else
-          echo "✅ Docker images built and tagged successfully"
+          echo "✅ Docker images built successfully"
           echo "ℹ️  Docker Hub credentials not configured - skipping push"
+          echo "   Images built as: ${DOCKER_USER}/[service-name]:latest"
           echo "   To enable pushing: Set DOCKER_USERNAME and DOCKER_PASSWORD secrets in repository settings"
         fi
