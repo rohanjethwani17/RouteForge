@@ -21,6 +21,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -137,17 +138,24 @@ class SseStreamingIntegrationTest {
             jedis.zadd("route:R1:vehicles", now, "V1001");
             jedis.zadd("route:R1:vehicles", now, "V1002");
             
-            String vehicleJson1 = String.format(
-                "{\"vehicleId\":\"V1001\",\"routeId\":\"R1\",\"lat\":40.7128,\"lon\":-74.0060,\"tsEpochMs\":%d}",
-                now
+            // Store vehicle data as Redis hashes (not JSON strings)
+            Map<String, String> vehicle1 = Map.of(
+                "vehicleId", "V1001",
+                "routeId", "R1", 
+                "lat", "40.7128",
+                "lon", "-74.0060",
+                "tsEpochMs", String.valueOf(now)
             );
-            String vehicleJson2 = String.format(
-                "{\"vehicleId\":\"V1002\",\"routeId\":\"R1\",\"lat\":40.7580,\"lon\":-73.9855,\"tsEpochMs\":%d}",
-                now
+            Map<String, String> vehicle2 = Map.of(
+                "vehicleId", "V1002",
+                "routeId", "R1",
+                "lat", "40.7580", 
+                "lon", "-73.9855",
+                "tsEpochMs", String.valueOf(now)
             );
             
-            jedis.set("veh:V1001", vehicleJson1);
-            jedis.set("veh:V1002", vehicleJson2);
+            jedis.hset("veh:V1001", vehicle1);
+            jedis.hset("veh:V1002", vehicle2);
         }
         
         mockMvc.perform(get("/api/routes/R1/vehicles"))
