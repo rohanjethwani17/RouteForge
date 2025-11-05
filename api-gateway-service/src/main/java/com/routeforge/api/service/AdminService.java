@@ -66,19 +66,19 @@ public class AdminService {
      */
     public int clearRouteCache(String routeId) {
         int totalDeleted = 0;
-        
         try (Jedis jedis = jedisPool.getResource()) {
-            // Delete route key
             String routeKey = "route:" + routeId + ":vehicles";
+    
+            // Fetch all vehicle IDs first
+            Set<String> vehicleIds = jedis.zrange(routeKey, 0, -1);
+    
+            // Delete the route set itself if it exists
             if (jedis.exists(routeKey)) {
                 jedis.del(routeKey);
                 totalDeleted++;
             }
-            
-            // Get all vehicle IDs for this route (before deleting)
-            Set<String> vehicleIds = jedis.zrange(routeKey, 0, -1);
-            
-            // Delete individual vehicle keys
+    
+            // Now delete each vehicle key associated with that route
             for (String vehicleId : vehicleIds) {
                 String vehicleKey = "veh:" + vehicleId;
                 if (jedis.exists(vehicleKey)) {
@@ -86,13 +86,11 @@ public class AdminService {
                     totalDeleted++;
                 }
             }
-            
+    
             log.info("Cleared {} cache keys for route: {}", totalDeleted, routeId);
-            
         } catch (Exception e) {
             log.error("Failed to clear cache for route: {}", routeId, e);
         }
-        
         return totalDeleted;
     }
     
