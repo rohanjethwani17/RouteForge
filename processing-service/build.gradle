@@ -4,7 +4,7 @@ plugins {
 }
 
 bootBuildImage {
-    imageName = "routeforge/processing-service:latest"
+    imageName = "${System.getenv('DOCKER_USERNAME') ?: 'routeforge'}/processing-service:latest"
 }
 
 dependencies {

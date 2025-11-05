@@ -4,7 +4,7 @@ plugins {
 }
 
 bootBuildImage {
-    imageName = "routeforge/ingestion-service:latest"
+    imageName = "${System.getenv('DOCKER_USERNAME') ?: 'routeforge'}/ingestion-service:latest"
 }
 
 dependencies {
