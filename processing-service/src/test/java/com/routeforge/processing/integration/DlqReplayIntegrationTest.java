@@ -73,6 +73,15 @@ class DlqReplayIntegrationTest {
         try (Jedis jedis = jedisPool.getResource()) {
             jedis.flushAll();
         }
+        
+        // Ensure DLQ topic exists by sending a dummy message and consuming it
+        try {
+            kafkaTemplate.send(properties.getDlqTopic(), "test", createTestEvent("TEST", "R1", 0.0, 0.0))
+                .get(5, TimeUnit.SECONDS);
+            Thread.sleep(1000); // Allow topic creation
+        } catch (Exception e) {
+            // Topic creation attempt - ignore errors
+        }
     }
     
     @Test

@@ -150,7 +150,7 @@ class SseStreamingIntegrationTest {
             jedis.set("veh:V1002", vehicleJson2);
         }
         
-        mockMvc.perform(get("/api/vehicles/routes/R1"))
+        mockMvc.perform(get("/api/routes/R1/vehicles"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()").value(2))
             .andExpect(jsonPath("$[0].vehicleId").exists())
