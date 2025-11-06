@@ -21,7 +21,7 @@ spring:
       concurrency: 3
   
   datasource:
-    url: ${POSTGRES_JDBC_URL:jdbc:postgresql://localhost:5432/routeforge}
+    url: ${POSTGRES_JDBC_URL:jdbc:postgresql://localhost:5433/routeforge}
     username: ${POSTGRES_USER:routeforge}
     password: ${POSTGRES_PASSWORD:routeforge123}
     driver-class-name: org.postgresql.Driver
