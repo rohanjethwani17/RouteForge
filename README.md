@@ -2,11 +2,10 @@
 
 **Real-time Public Transit Tracking Platform**
 
-RouteForge is a production-grade, cloud-native distributed system that ingests GTFS-Realtime vehicle position feeds, processes them asynchronously through Apache Kafka, maintains hot cache state in Redis, stores historical data in PostgreSQL, and exposes secure REST + WebSocket APIs for real-time vehicle tracking.
+RouteForge is a Java + Spring Boot distributed system for real time public transit tracking. It ingests live vehicle position data in the GTFS‑Realtime format, processes that stream asynchronously through Apache Kafka, and keeps two sources of truth: a Redis cache for the most recent positions and a PostgreSQL database for historical records. An API gateway exposes that data through secure REST endpoints and Server‑Sent Events streams, so clients can fetch the current location of a single bus, the list of vehicles on a route, or subscribe to continuous updates without polling.
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.org/projects/jdk/17/)
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2-green.svg)](https://spring.io/projects/spring-boot)
+The system is composed of three Spring‑Boot microservices. The ingestion service polls external GTFS feeds every few seconds, converts the protobuf messages into JSON events, and publishes them to Kafka with circuit breakers and retries to handle feed outages. The processing service consumes those events in batches, updates the Redis cache and writes to PostgreSQL, publishes notifications through Redis and routes unprocessable messages to a dead‑letter queue. The API gateway serves user requests, prioritising the cache and falling back to the database when necessary, enforces rate limits, and can be secured with OAuth2/JWT via Keycloak. A Prometheus–Grafana stack collects metrics such as events processed, cache updates and API latency, and structured logs include trace identifiers for easier debugging.
+
 
 ## 🏗️ Architecture
 
@@ -33,7 +32,7 @@ GTFS-RT Feed → Ingestion Service → Kafka → Processing Service → Redis (h
 
 ### Prerequisites
 
-- Java 17+
+- Java 21
 - Docker & Docker Compose
 - 8GB RAM minimum
 
